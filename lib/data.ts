@@ -19,7 +19,7 @@ export const projects = [
     longDescription:
       "Built with MERN Stack, featuring Google OAuth 2.0 for authentication, Cloudinary for optimized media storage, and Razorpay for secure payment integration. Implemented JWT-based authentication with role-based access control (RBAC) for students, instructors, and admins.",
     tech: ["MongoDB", "Express.js", "React", "Node.js", "Cloudinary", "OAuth 2.0", "Razorpay", "JWT"],
-    liveUrl: "#",
+    liveUrl: "https://study-notion-f1-silk.vercel.app/",
     githubUrl: "#",
     year: "2025",
     color: "from-violet-500 to-indigo-600",
@@ -34,7 +34,7 @@ export const projects = [
     longDescription:
       "Architected with Next.js and TypeScript featuring adaptive glassmorphism UI with pixel-perfect dark/light mode. Multi-provider OAuth (Google, GitHub) with NextAuth and Resend API for email workflows.",
     tech: ["Next.js", "TypeScript", "PostgreSQL", "Shadcn/ui", "Tailwind CSS", "NextAuth", "Resend", "Neon"],
-    liveUrl: "#",
+    liveUrl: "https://note-forge-18.vercel.app/",
     githubUrl: "#",
     year: "2025",
     color: "from-emerald-500 to-teal-600",
