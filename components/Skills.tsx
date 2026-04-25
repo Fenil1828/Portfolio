@@ -180,9 +180,9 @@ export default function Skills() {
                     {[...row1, ...row1].map((tech, i) => (
                       <div
                         key={`r1-${i}`}
-                        className="flex-shrink-0 flex flex-col items-center justify-center gap-3 w-24 h-24 transition-all duration-300 hover:scale-110 hover:-translate-y-2 cursor-default group"
+                        className="flex-shrink-0 flex flex-col items-center justify-center gap-3 w-28 h-28 transition-all duration-300 hover:scale-110 hover:-translate-y-2 cursor-default group"
                       >
-                        <i className={`${tech.icon} text-4xl transition-all duration-300`} style={{ filter: "brightness(0.75) saturate(0.6)", }} />
+                        <i className={`${tech.icon} text-5xl transition-all duration-300`} style={{ filter: "brightness(0.75) saturate(0.6)", }} />
                         <span className="font-dm text-[10px] font-medium text-center leading-tight px-1" style={{ color: "var(--text-muted)" }}>
                           {tech.name}
                         </span>
@@ -200,9 +200,9 @@ export default function Skills() {
                     {[...row2, ...row2].map((tech, i) => (
                       <div
                         key={`r2-${i}`}
-                        className="flex-shrink-0 flex flex-col items-center justify-center gap-3 w-24 h-24 transition-all duration-300 hover:scale-110 hover:-translate-y-2 cursor-default group"
+                        className="flex-shrink-0 flex flex-col items-center justify-center gap-3 w-28 h-28 transition-all duration-300 hover:scale-110 hover:-translate-y-2 cursor-default group"
                       >
-                        <i className={`${tech.icon} text-4xl transition-all duration-300`} style={{ filter: "brightness(0.75) saturate(0.6)" }} />
+                        <i className={`${tech.icon} text-5xl transition-all duration-300`} style={{ filter: "brightness(0.75) saturate(0.6)" }} />
                         <span className="font-dm text-[10px] font-medium text-center leading-tight px-1" style={{ color: "var(--text-muted)" }}>
                           {tech.name}
                         </span>
