@@ -10,7 +10,7 @@ const stats = [
   { label: "Projects Built", value: "4+", icon: Code2 },
   { label: "Tech Stack", value: "20+", icon: Zap },
   { label: "Certifications", value: "5", icon: GraduationCap },
-  { label: "Year of Study", value: "2nd", icon: MapPin },
+  { label: "Year of Study", value: "3rd", icon: MapPin },
 ];
 
 const traits = [
