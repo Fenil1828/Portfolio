@@ -64,7 +64,7 @@ export default function About() {
             </div>
 
             <p className="font-dm text-base text-secondary-c leading-relaxed mb-5">
-              I'm a second-year Computer Engineering student at Gujarat Technical University,
+              I'm a third-year Computer Engineering student at Gujarat Technical University,
               passionate about crafting scalable web applications that solve real-world problems.
             </p>
             <p className="font-dm text-base text-secondary-c leading-relaxed mb-5">
