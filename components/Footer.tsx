@@ -6,7 +6,7 @@ import { personalInfo } from "@/lib/data";
 
 export default function Footer() {
   return (
-    <footer className="border-t border-subtle bg-main-2 mt-12 py-16">
+    <footer className="border-t border-subtle bg-main-2 mt-12 py-3">
       <div className="container-custom px-8 sm:px-12">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-8">
           {/* Brand */}
