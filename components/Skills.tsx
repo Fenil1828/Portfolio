@@ -157,11 +157,11 @@ export default function Skills() {
             <div className="flex items-end justify-between mb-8">
               <div>
                 <p className="font-syne text-2xl font-bold text-primary-c">All Technologies</p>
-                <p className="font-dm text-sm text-muted-c mt-1">Hover to pause · {allTech.length} tools & counting</p>
+                <p className="font-dm text-sm text-muted-c mt-1">Mastered {allTech.length}+ tools used in production-grade applications</p>
               </div>
               <span className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-subtle bg-surface text-xs font-dm text-muted-c">
                 <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: accent }} />
-                Continuous scroll
+                Full-stack expertise
               </span>
             </div>
 

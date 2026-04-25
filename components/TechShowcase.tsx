@@ -55,10 +55,11 @@ export default function TechShowcase() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Heading */}
         <div className="text-center mb-12">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-2">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
             <span className="text-[var(--text-primary)]">All Technologies</span>
           </h2>
-          <p className="text-lg text-[var(--text-secondary-c)]">31+ tools</p>
+          <p className="text-sm sm:text-base text-[var(--text-secondary-c)] font-medium">31+ technologies I've mastered and actively use in production</p>
+          <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-2">Full-stack expertise spanning frontend, backend, databases, and DevOps</p>
         </div>
 
         {/* Tech Slider - No Background */}
@@ -77,7 +78,7 @@ export default function TechShowcase() {
                 className="flex-shrink-0 flex flex-col items-center justify-center gap-2 cursor-default select-none transition-transform duration-300 hover:scale-110 group/tech"
               >
                 <i
-                  className={`${tech.icon} text-3xl sm:text-4xl lg:text-5xl transition-all duration-300 filter grayscale group-hover/tech:grayscale-0`}
+                  className={`${tech.icon} text-3xl sm:text-4xl lg:text-5xl transition-all duration-300 filter brightness-125 saturate-150 group-hover/tech:brightness-150 group-hover/tech:saturate-200`}
                 />
                 <span className="text-xs sm:text-sm text-[var(--text-secondary-c)] font-medium text-center whitespace-nowrap group-hover/tech:text-[var(--text-primary)] transition-colors duration-300">
                   {tech.name}
@@ -91,7 +92,7 @@ export default function TechShowcase() {
                 className="flex-shrink-0 flex flex-col items-center justify-center gap-2 cursor-default select-none transition-transform duration-300 hover:scale-110 group/tech"
               >
                 <i
-                  className={`${tech.icon} text-3xl sm:text-4xl lg:text-5xl transition-all duration-300 filter grayscale group-hover/tech:grayscale-0`}
+                  className={`${tech.icon} text-3xl sm:text-4xl lg:text-5xl transition-all duration-300 filter brightness-125 saturate-150 group-hover/tech:brightness-150 group-hover/tech:saturate-200`}
                 />
                 <span className="text-xs sm:text-sm text-[var(--text-secondary-c)] font-medium text-center whitespace-nowrap group-hover/tech:text-[var(--text-primary)] transition-colors duration-300">
                   {tech.name}
@@ -102,9 +103,9 @@ export default function TechShowcase() {
         </div>
 
         {/* Hint */}
-        <div className="text-center mt-6">
-          <p className="text-xs sm:text-sm text-[var(--text-muted)]">
-            ✨ Hover any icon to reveal its color
+        <div className="text-center mt-8">
+          <p className="text-xs sm:text-sm text-[var(--text-muted)] font-medium">
+            Used in production | Built scalable applications with modern best practices
           </p>
         </div>
       </div>
