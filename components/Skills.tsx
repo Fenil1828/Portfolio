@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
+import { Cloud } from "lucide-react";
 import { skills } from "@/lib/data";
 
 const categories = Object.keys(skills) as Array<keyof typeof skills>;
@@ -34,7 +35,7 @@ const allTech = [
   { name: "Redux",         icon: "devicon-redux-original colored" },
   { name: "GraphQL",       icon: "devicon-graphql-plain colored" },
   { name: "Vercel",        icon: "devicon-vercel-original" },
-  { name: "Cloudinary",    icon: "devicon-cloudinary-plain colored" },
+  { name: "Cloudinary",    icon: "devicon-cloudinary-original colored" },
   { name: "OAuth 2.0",     icon: "devicon-google-plain colored" },
   { name: "RESTful APIs",  icon: "devicon-fastapi-plain colored" },
   { name: "DBMS",          icon: "devicon-mysql-plain colored" },
@@ -182,7 +183,11 @@ export default function Skills() {
                         key={`r1-${i}`}
                         className="flex-shrink-0 flex flex-col items-center justify-center gap-3 w-28 h-28 transition-all duration-300 hover:scale-110 hover:-translate-y-2 cursor-default group"
                       >
-                        <i className={`${tech.icon} text-5xl transition-all duration-300`} style={{ filter: "brightness(0.75) saturate(0.6)", }} />
+                        {tech.name === 'Cloudinary' ? (
+                          <Cloud className="w-12 h-12 text-blue-500 transition-all duration-300" style={{ filter: "brightness(0.75) saturate(0.6)" }} />
+                        ) : (
+                          <i className={`${tech.icon} text-5xl transition-all duration-300`} style={{ filter: "brightness(0.75) saturate(0.6)", }} />
+                        )}
                         <span className="font-dm text-[10px] font-medium text-center leading-tight px-1" style={{ color: "var(--text-muted)" }}>
                           {tech.name}
                         </span>
@@ -202,7 +207,11 @@ export default function Skills() {
                         key={`r2-${i}`}
                         className="flex-shrink-0 flex flex-col items-center justify-center gap-3 w-28 h-28 transition-all duration-300 hover:scale-110 hover:-translate-y-2 cursor-default group"
                       >
-                        <i className={`${tech.icon} text-5xl transition-all duration-300`} style={{ filter: "brightness(0.75) saturate(0.6)" }} />
+                        {tech.name === 'Cloudinary' ? (
+                          <Cloud className="w-12 h-12 text-blue-500 transition-all duration-300" style={{ filter: "brightness(0.75) saturate(0.6)" }} />
+                        ) : (
+                          <i className={`${tech.icon} text-5xl transition-all duration-300`} style={{ filter: "brightness(0.75) saturate(0.6)" }} />
+                        )}
                         <span className="font-dm text-[10px] font-medium text-center leading-tight px-1" style={{ color: "var(--text-muted)" }}>
                           {tech.name}
                         </span>

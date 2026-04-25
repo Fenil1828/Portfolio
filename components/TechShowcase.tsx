@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Cloud } from 'lucide-react';
 
 export default function TechShowcase() {
   const [mounted, setMounted] = useState(false);
@@ -30,7 +31,7 @@ export default function TechShowcase() {
     { name: 'VS Code', icon: 'devicon-vscode-plain colored' },
     { name: 'Postman', icon: 'devicon-postman-plain colored' },
     { name: 'Shadcn/ui', icon: 'devicon-react-original colored' },
-    { name: 'Cloudinary', icon: 'devicon-cloudinary-plain colored' },
+    { name: 'Cloudinary', icon: 'devicon-cloudinary-original colored' },
     { name: 'Neon', icon: 'devicon-postgresql-plain colored' },
     { name: 'WebSocket', icon: 'devicon-nodejs-plain colored' },
     { name: 'OAuth 2.0', icon: 'devicon-github-original colored' },
@@ -77,9 +78,13 @@ export default function TechShowcase() {
                 key={idx}
                 className="flex-shrink-0 flex flex-col items-center justify-center gap-2 cursor-default select-none transition-transform duration-300 hover:scale-110 group/tech"
               >
-                <i
-                  className={`${tech.icon} text-3xl sm:text-4xl lg:text-5xl transition-all duration-300 filter brightness-125 saturate-150 group-hover/tech:brightness-150 group-hover/tech:saturate-200`}
-                />
+                {tech.name === 'Cloudinary' ? (
+                  <Cloud className="w-8 sm:w-10 lg:w-12 h-8 sm:h-10 lg:h-12 text-blue-500 transition-all duration-300 filter brightness-125 saturate-150 group-hover/tech:brightness-150 group-hover/tech:saturate-200" />
+                ) : (
+                  <i
+                    className={`${tech.icon} text-3xl sm:text-4xl lg:text-5xl transition-all duration-300 filter brightness-125 saturate-150 group-hover/tech:brightness-150 group-hover/tech:saturate-200`}
+                  />
+                )}
                 <span className="text-xs sm:text-sm text-[var(--text-secondary-c)] font-medium text-center whitespace-nowrap group-hover/tech:text-[var(--text-primary)] transition-colors duration-300">
                   {tech.name}
                 </span>
@@ -91,9 +96,13 @@ export default function TechShowcase() {
                 key={`dup-${idx}`}
                 className="flex-shrink-0 flex flex-col items-center justify-center gap-2 cursor-default select-none transition-transform duration-300 hover:scale-110 group/tech"
               >
-                <i
-                  className={`${tech.icon} text-3xl sm:text-4xl lg:text-5xl transition-all duration-300 filter brightness-125 saturate-150 group-hover/tech:brightness-150 group-hover/tech:saturate-200`}
-                />
+                {tech.name === 'Cloudinary' ? (
+                  <Cloud className="w-8 sm:w-10 lg:w-12 h-8 sm:h-10 lg:h-12 text-blue-500 transition-all duration-300 filter brightness-125 saturate-150 group-hover/tech:brightness-150 group-hover/tech:saturate-200" />
+                ) : (
+                  <i
+                    className={`${tech.icon} text-3xl sm:text-4xl lg:text-5xl transition-all duration-300 filter brightness-125 saturate-150 group-hover/tech:brightness-150 group-hover/tech:saturate-200`}
+                  />
+                )}
                 <span className="text-xs sm:text-sm text-[var(--text-secondary-c)] font-medium text-center whitespace-nowrap group-hover/tech:text-[var(--text-primary)] transition-colors duration-300">
                   {tech.name}
                 </span>
