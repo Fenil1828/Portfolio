@@ -30,7 +30,7 @@ export default function TechShowcase() {
     { name: 'VS Code', icon: 'devicon-vscode-plain colored' },
     { name: 'Postman', icon: 'devicon-postman-plain colored' },
     { name: 'Shadcn/ui', icon: 'devicon-react-original colored' },
-    { name: 'Cloudinary', icon: 'devicon-nodejs-plain colored' },
+    { name: 'Cloudinary', icon: 'devicon-cloudinary-plain colored' },
     { name: 'Neon', icon: 'devicon-postgresql-plain colored' },
     { name: 'WebSocket', icon: 'devicon-nodejs-plain colored' },
     { name: 'OAuth 2.0', icon: 'devicon-github-original colored' },
