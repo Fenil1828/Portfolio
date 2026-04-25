@@ -43,7 +43,17 @@ export default function Projects() {
               className="group relative bg-surface border border-subtle rounded-3xl overflow-hidden cursor-default"
             >
               {/* Gradient top bar */}
-              <div className={`h-1 w-full bg-gradient-to-r ${project.color}`} />
+              <div 
+                className="h-1.5 w-full transition-all duration-300"
+                style={{
+                  background: project.color.includes('violet') ? 'linear-gradient(to right, #a78bfa, #4f46e5)' :
+                              project.color.includes('emerald') ? 'linear-gradient(to right, #10b981, #0d9488)' :
+                              project.color.includes('rose') ? 'linear-gradient(to right, #f43f94, #ec4899)' :
+                              project.color.includes('amber') ? 'linear-gradient(to right, #f59e0b, #ea580c)' :
+                              'linear-gradient(to right, #6b7280, #6b7280)',
+                  boxShadow: hovered === i ? `0 0 16px ${project.accent}60` : 'none'
+                }}
+              />
 
               {/* Animated glow on hover */}
               <motion.div
