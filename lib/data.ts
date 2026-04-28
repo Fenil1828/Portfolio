@@ -12,6 +12,40 @@ export const personalInfo = {
 
 export const projects = [
   {
+    title: "Fix2PDF",
+    subtitle: "Privacy-first browser PDF toolkit",
+    description:
+      "A complete PDF toolkit that processes everything client-side via WebAssembly. Convert, compress, merge, split, and encrypt—your files physically never touch a server. Built after noticing most 'free' document tools are surveillance infrastructure with a friendly UI.",
+    longDescription:
+      "Zero-server architecture using WebAssembly for 85% faster processing. Encrypt with AES-256, batch process 50+ files, compress up to 90% without loss. Firebase Auth for seamless login, Vercel Edge for <100ms latency. Half a million documents transformed with perfect 5-star satisfaction rate.",
+    tech: ["Next.js 14", "WebAssembly", "PDF.js", "Firebase Auth", "Vercel Edge", "Firestore"],
+    liveUrl: "https://www.fix2pdf.com/",
+    githubUrl: "https://www.fix2pdf.com/",
+    year: "2024",
+    color: "emerald",
+    accent: "#10b981",
+    highlights: ["500K+ documents", "Zero server architecture", "AES-256 encryption", "85% faster WASM", "Batch 50+ files", "90% compression"],
+    badge: "Founder",
+    badgeColor: "#10b981",
+  },
+  {
+    title: "Kventures Restro AI",
+    subtitle: "AI-powered WhatsApp agent for restaurants",
+    description:
+      "Intelligent AI agent on WhatsApp that engages customers, validates inventory in real-time, and runs restaurants 24/7 without human intervention. Built with n8n and Google Gemini, delivering sub-2s response latency with zero marginal cost per transaction.",
+    longDescription:
+      "Enterprise-grade automation orchestrating end-to-end order workflows autonomously. Features natural language conversations, real-time inventory validation, 100% order capture rate, and 60% operational efficiency improvement. Open-source and self-hostable—no vendor lock-in, no subscription fees. Perfect for cloud kitchens, QSR chains, and on-demand food services.",
+    tech: ["n8n", "Gemini AI", "WhatsApp Business API", "PostgreSQL", "Oracle Cloud", "Google Sheets"],
+    liveUrl: "https://lnkd.in/d7vMaQQQ",
+    githubUrl: "https://lnkd.in/d7vMaQQQ",
+    year: "2024",
+    color: "amber",
+    accent: "#f59e0b",
+    highlights: ["Sub-2s latency", "100% order capture", "60% efficiency gain", "Zero marginal cost", "Open-source", "Self-hostable"],
+    badge: "Open Source",
+    badgeColor: "#f59e0b",
+  },
+  {
     title: "StudyNotion",
     subtitle: "EdTech Learning Platform",
     description:
@@ -22,7 +56,7 @@ export const projects = [
     liveUrl: "https://study-notion-f1-silk.vercel.app/",
     githubUrl: "#",
     year: "2025",
-    color: "from-violet-500 to-indigo-600",
+    color: "violet",
     accent: "#7c3aed",
     highlights: ["1000+ users", "Razorpay payments", "RBAC auth", "RESTful APIs"],
   },
@@ -37,7 +71,7 @@ export const projects = [
     liveUrl: "https://note-forge-18.vercel.app/",
     githubUrl: "#",
     year: "2025",
-    color: "from-emerald-500 to-teal-600",
+    color: "emerald",
     accent: "#059669",
     highlights: ["Glassmorphism UI", "Dark/light mode", "OAuth login", "Tiptap editor"],
   },
@@ -52,7 +86,7 @@ export const projects = [
     liveUrl: "#",
     githubUrl: "#",
     year: "2024",
-    color: "from-rose-500 to-pink-600",
+    color: "rose",
     accent: "#e11d48",
     highlights: ["E2E encryption", "WebSocket", "AI moderation", "Anonymous"],
   },
@@ -67,7 +101,7 @@ export const projects = [
     liveUrl: "#",
     githubUrl: "#",
     year: "2024",
-    color: "from-amber-500 to-orange-600",
+    color: "amber",
     accent: "#d97706",
     highlights: ["Chart.js analytics", "Real-time tracking", "RBAC", "Audit logging"],
   },
