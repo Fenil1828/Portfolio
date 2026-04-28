@@ -73,9 +73,9 @@ export default function Hero() {
           }}
         />
 
-        <div className="container-custom relative z-10" style={{ paddingTop: "clamp(60px, 8vh, 120px)", paddingBottom: "clamp(60px, 10vh, 140px)" }}>
+        <div className="container-custom relative z-10 pt-24 pb-28">
           <motion.div variants={stagger.container} initial="hidden" animate="show" className="max-w-4xl">
-            <motion.div variants={stagger.item} style={{ marginBottom: "clamp(18px, 2.5vh, 32px)" }}>
+            <motion.div variants={stagger.item} className="mb-6">
               <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-subtle bg-surface text-xs font-dm text-secondary-c">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 Available for opportunities
@@ -84,42 +84,28 @@ export default function Hero() {
 
             <motion.h1
               variants={stagger.item}
-              className="font-syne font-bold leading-[1.05] tracking-tight"
-              style={{ fontSize: "clamp(32px, 7vw, 96px)", marginBottom: "clamp(16px, 3vh, 40px)" }}
+              className="font-syne text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-bold leading-[1.05] tracking-tight mb-6"
             >
               <span className="text-primary-c">Fenil</span>
               <br />
               <span className="text-gradient">Jasani</span>
             </motion.h1>
 
-            <motion.p 
-              variants={stagger.item} 
-              className="font-syne font-medium text-secondary-c"
-              style={{ fontSize: "clamp(16px, 2.5vw, 28px)", marginBottom: "clamp(12px, 1.5vh, 24px)" }}
-            >
+            <motion.p variants={stagger.item} className="font-syne text-xl sm:text-2xl font-medium text-secondary-c mb-4">
               Full Stack Developer
             </motion.p>
 
-            <motion.p 
-              variants={stagger.item} 
-              className="font-dm text-muted-c max-w-xl leading-relaxed"
-              style={{ fontSize: "clamp(13px, 1.8vw, 18px)", marginBottom: "clamp(24px, 4vh, 48px)" }}
-            >
+            <motion.p variants={stagger.item} className="font-dm text-base sm:text-lg text-muted-c max-w-xl leading-relaxed mb-10">
               Building scalable, production-ready web experiences with the MERN Stack,
               Next.js, and TypeScript. Passionate about clean architecture and great UX.
             </motion.p>
 
-            <motion.div 
-              variants={stagger.item} 
-              className="flex flex-wrap gap-3"
-              style={{ marginBottom: "clamp(24px, 4vh, 48px)", gap: "clamp(10px, 1.5vw, 16px)" }}
-            >
+            <motion.div variants={stagger.item} className="flex flex-wrap gap-3 mb-12">
               <motion.button
                 whileHover={{ scale: 1.04, y: -2 }}
                 whileTap={{ scale: 0.97 }}
                 onClick={() => document.querySelector("#projects")?.scrollIntoView({ behavior: "smooth" })}
-                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-dm font-medium rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-violet-500/25"
-                style={{ fontSize: "clamp(12px, 1.2vw, 14px)", padding: "clamp(8px, 1.2vh, 12px) clamp(16px, 3vw, 28px)" }}
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-dm font-medium rounded-xl hover:opacity-90 transition-opacity text-sm shadow-lg shadow-violet-500/25"
               >
                 View Projects
                 <ExternalLink size={15} />
@@ -130,18 +116,13 @@ export default function Hero() {
                 download
                 whileHover={{ scale: 1.04, y: -2 }}
                 whileTap={{ scale: 0.97 }}
-                className="flex items-center gap-2 border border-strong-c bg-surface text-primary-c font-dm font-medium rounded-xl hover:bg-surface-2 transition-colors"
-                style={{ fontSize: "clamp(12px, 1.2vw, 14px)", padding: "clamp(8px, 1.2vh, 12px) clamp(16px, 3vw, 28px)" }}
+                className="flex items-center gap-2 px-6 py-3 border border-strong-c bg-surface text-primary-c font-dm font-medium rounded-xl hover:bg-surface-2 transition-colors text-sm"
               >
                 Download Resume
               </motion.a>
             </motion.div>
 
-            <motion.div 
-              variants={stagger.item} 
-              className="flex items-center flex-wrap"
-              style={{ gap: "clamp(8px, 1.5vw, 16px)" }}
-            >
+            <motion.div variants={stagger.item} className="flex items-center gap-4">
               {[
                 { icon: Github, href: personalInfo.github, label: "GitHub" },
                 { icon: Linkedin, href: personalInfo.linkedin, label: "LinkedIn" },
@@ -154,14 +135,13 @@ export default function Hero() {
                   rel="noopener noreferrer"
                   whileHover={{ scale: 1.1, y: -2 }}
                   whileTap={{ scale: 0.95 }}
-                  className="rounded-xl border border-subtle bg-surface flex items-center justify-center text-muted-c hover:text-primary-c hover:border-strong-c transition-all"
-                  style={{ width: "clamp(32px, 4vw, 44px)", height: "clamp(32px, 4vw, 44px)" }}
+                  className="w-10 h-10 rounded-xl border border-subtle bg-surface flex items-center justify-center text-muted-c hover:text-primary-c hover:border-strong-c transition-all"
                   aria-label={label}
                 >
                   <Icon size={17} />
                 </motion.a>
               ))}
-              <span className="text-xs font-dm text-muted-c" style={{ marginLeft: "clamp(4px, 1vw, 8px)" }}>{personalInfo.email}</span>
+              <span className="text-xs font-dm text-muted-c ml-1">{personalInfo.email}</span>
             </motion.div>
           </motion.div>
         </div>
