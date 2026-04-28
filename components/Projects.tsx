@@ -460,7 +460,7 @@ export default function Projects() {
     <section
       id="projects"
       ref={sectionRef}
-      style={{ background: "var(--bg)", position: "relative" }}
+      style={{ background: "var(--bg)", position: "relative", paddingBottom: "clamp(4px, 1vh, 80px)" }}
     >
 
       {/* ── HEADER — normal flow, sits above the sticky runway ─────────── */}
@@ -517,13 +517,14 @@ export default function Projects() {
       <div
         style={{
           position: "relative",
-          height: "120vh",
+          height: "clamp(75vh, 100vh, 100vh)",
           width: "100%",
           overflow: "hidden",
           display: "flex",
           alignItems: "flex-start",
           justifyContent: "center",
-          paddingTop: "clamp(40px, 0vh, 100px)",
+          paddingTop: "clamp(2px, 0.5vh, 40px)",
+          paddingBottom: "clamp(20px, 0vh, 50px)",
         }}
       >
         <div
@@ -552,7 +553,7 @@ export default function Projects() {
       </div>
 
       {/* Breathing room at the bottom of the section */}
-      <div style={{ height: "1vh" }} />
+      <div style={{ height: 0 }} />
     </section>
   );
 }
