@@ -19,7 +19,7 @@ type EnhancedProject = (typeof projectsData)[0] & {
   gradientBar: string;
   glowColor: string;
   accentRgb: string;
-  imageDisplay?: "screenshot" | "cover";
+  imageDisplay?: string;
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
