@@ -14,6 +14,8 @@ export const projects = [
   {
     title: "Fix2PDF",
     subtitle: "Privacy-first browser PDF toolkit",
+    image: "/images/fix2pdf.png",
+    imageDisplay: "screenshot",
     description:
       "A complete PDF toolkit that processes everything client-side via WebAssembly. Convert, compress, merge, split, and encrypt—your files physically never touch a server. Built after noticing most 'free' document tools are surveillance infrastructure with a friendly UI.",
     longDescription:
@@ -31,6 +33,8 @@ export const projects = [
   {
     title: "Kventures Restro AI",
     subtitle: "AI-powered WhatsApp agent for restaurants",
+    image: "/images/kventure.jpeg",
+    imageDisplay: "screenshot",
     description:
       "Intelligent AI agent on WhatsApp that engages customers, validates inventory in real-time, and runs restaurants 24/7 without human intervention. Built with n8n and Google Gemini, delivering sub-2s response latency with zero marginal cost per transaction.",
     longDescription:
@@ -48,6 +52,8 @@ export const projects = [
   {
     title: "StudyNotion",
     subtitle: "EdTech Learning Platform",
+    image: "/images/study.png",
+    imageDisplay: "screenshot",
     description:
       "Scalable e-learning platform serving 1000+ users with course management, secure payments, and real-time progress tracking.",
     longDescription:
@@ -63,6 +69,8 @@ export const projects = [
   {
     title: "NoteForge",
     subtitle: "Productivity Platform",
+    image: "/images/note.png",
+    imageDisplay: "screenshot",
     description:
       "Serverless note-taking app with intelligent workspaces, Tiptap rich-text editor, and advanced search using Neon PostgreSQL.",
     longDescription:
@@ -78,12 +86,14 @@ export const projects = [
   {
     title: "Anonymous Messenger",
     subtitle: "Real-time Secure Chat",
+    image: "/images/Anonnyms.png",
+    imageDisplay: "screenshot",
     description:
       "Real-time anonymous messaging platform with end-to-end encryption, WebSocket architecture, and AI-powered content moderation.",
     longDescription:
       "Developed with Node.js and WebSocket featuring AI-powered sentiment analysis for intelligent content moderation. Implemented personality discovery features using AI algorithms to match users based on communication patterns.",
     tech: ["Node.js", "WebSocket", "MongoDB", "AI/ML", "Encryption"],
-    liveUrl: "#",
+    liveUrl: "https://mystery-message-virid-seven.vercel.app/",
     githubUrl: "#",
     year: "2024",
     color: "rose",
@@ -93,12 +103,14 @@ export const projects = [
   {
     title: "Rental Management",
     subtitle: "Admin Dashboard System",
+    image: "/images/rental.png",
+    imageDisplay: "screenshot",
     description:
       "Comprehensive admin dashboard for inventory management with real-time tracking, booking oversight, and revenue analytics.",
     longDescription:
       "Built with React.js and Node.js featuring Chart.js visualizations for revenue analytics. Designed RESTful APIs for CRUD operations, automated availability updates, and role-based access control with audit logging.",
     tech: ["React.js", "Node.js", "Express.js", "MongoDB", "Chart.js"],
-    liveUrl: "#",
+    liveUrl: "https://neny-s-purse-house.vercel.app/",
     githubUrl: "#",
     year: "2024",
     color: "amber",

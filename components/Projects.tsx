@@ -1,9 +1,10 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
 import { useTheme } from "next-themes";
-import { motion, useInView } from "framer-motion";
-import { ExternalLink, Github, ArrowRight, Calendar } from "lucide-react";
+import { motion, useInView, AnimatePresence } from "framer-motion";
+import { ExternalLink, Github, ArrowUpRight } from "lucide-react";
+import Image from "next/image";
 import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
 import { projects as projectsData } from "@/lib/data";
@@ -17,466 +18,762 @@ gsap.registerPlugin(ScrollTrigger);
 type EnhancedProject = (typeof projectsData)[0] & {
   gradientBar: string;
   glowColor: string;
-  bgFrom: string;
-  bgTo: string;
+  accentRgb: string;
+  imageDisplay?: "screenshot" | "cover";
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
 // COLOR MAP
 // ─────────────────────────────────────────────────────────────────────────────
 
-function getProjectUIProps(color: string, isDark: boolean) {
-  const colorMap: Record<string, { gradient: string; glow: string; bgFrom: string; bgTo: string }> = {
-    emerald: {
-      gradient: "linear-gradient(90deg,#10b981,#0d9488)",
-      glow: "#10b981",
-      bgFrom: isDark ? "#061812" : "#d1f2eb",
-      bgTo:   isDark ? "#0c2e1e" : "#a7f3d0",
-    },
-    amber: {
-      gradient: "linear-gradient(90deg,#f59e0b,#ea580c)",
-      glow: "#f59e0b",
-      bgFrom: isDark ? "#1a1002" : "#fef3c7",
-      bgTo:   isDark ? "#2e1c04" : "#fed7aa",
-    },
-    violet: {
-      gradient: "linear-gradient(90deg,#a78bfa,#4f46e5)",
-      glow: "#a78bfa",
-      bgFrom: isDark ? "#0c071e" : "#ede9fe",
-      bgTo:   isDark ? "#160d36" : "#ddd6fe",
-    },
-    rose: {
-      gradient: "linear-gradient(90deg,#f43f5e,#ec4899)",
-      glow: "#f43f5e",
-      bgFrom: isDark ? "#180508" : "#ffe4e6",
-      bgTo:   isDark ? "#2a0c14" : "#fbcfe8",
-    },
-    sky: {
-      gradient: "linear-gradient(90deg,#38bdf8,#0ea5e9)",
-      glow: "#38bdf8",
-      bgFrom: isDark ? "#020e1c" : "#e0f2fe",
-      bgTo:   isDark ? "#061a2e" : "#bae6fd",
-    },
-    lime: {
-      gradient: "linear-gradient(90deg,#84cc16,#16a34a)",
-      glow: "#84cc16",
-      bgFrom: isDark ? "#081202" : "#dcfce7",
-      bgTo:   isDark ? "#0f1e05" : "#bef264",
-    },
-  };
-  const props = colorMap[color] || colorMap.violet;
-  return { gradientBar: props.gradient, glowColor: props.glow, bgFrom: props.bgFrom, bgTo: props.bgTo };
-}
+const COLOR_META: Record<string, { gradient: string; glow: string; rgb: string }> = {
+  emerald: { gradient: "linear-gradient(135deg,#10b981,#0d9488)", glow: "#10b981", rgb: "16,185,129" },
+  amber:   { gradient: "linear-gradient(135deg,#f59e0b,#ea580c)", glow: "#f59e0b", rgb: "245,158,11" },
+  violet:  { gradient: "linear-gradient(135deg,#a78bfa,#4f46e5)", glow: "#a78bfa", rgb: "167,139,250" },
+  rose:    { gradient: "linear-gradient(135deg,#f43f5e,#ec4899)", glow: "#f43f5e", rgb: "244,63,94" },
+  sky:     { gradient: "linear-gradient(135deg,#38bdf8,#0ea5e9)", glow: "#38bdf8", rgb: "56,189,248" },
+  lime:    { gradient: "linear-gradient(135deg,#84cc16,#16a34a)", glow: "#84cc16", rgb: "132,204,22" },
+};
 
 function useEnhancedProjects(): EnhancedProject[] {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
-  const isDark = mounted ? resolvedTheme === "dark" : false;
-  return projectsData.map((p) => ({ ...p, ...getProjectUIProps(p.color, isDark) }));
+  void resolvedTheme; void mounted;
+  return projectsData.map((p) => {
+    const meta = COLOR_META[p.color] || COLOR_META.violet;
+    return { ...p, gradientBar: meta.gradient, glowColor: meta.glow, accentRgb: meta.rgb };
+  });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// CANVAS IMAGE
+// COUNTER ANIMATION HOOK
 // ─────────────────────────────────────────────────────────────────────────────
 
-function ProjectImage({ project }: { project: EnhancedProject }) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
+function useCountUp(target: number, active: boolean, duration = 600) {
+  const [val, setVal] = useState(0);
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const draw = () => {
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
-      const dpr = window.devicePixelRatio || 1;
-      const w = canvas.offsetWidth;
-      const h = canvas.offsetHeight;
-      if (!w || !h) return;
-      canvas.width = w * dpr;
-      canvas.height = h * dpr;
-      ctx.scale(dpr, dpr);
-
-      const bg = ctx.createLinearGradient(0, 0, w, h);
-      bg.addColorStop(0, project.bgFrom);
-      bg.addColorStop(1, project.bgTo);
-      ctx.fillStyle = bg;
-      ctx.fillRect(0, 0, w, h);
-
-      ctx.globalAlpha = 0.22;
-      for (let i = 0; i < 5; i++) {
-        const x = w * (0.08 + i * 0.22);
-        const y = h * (0.28 + Math.sin(i * 1.6) * 0.3);
-        const r = 50 + i * 24;
-        const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-        g.addColorStop(0, project.accent);
-        g.addColorStop(1, "transparent");
-        ctx.fillStyle = g;
-        ctx.beginPath();
-        ctx.arc(x, y, r, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.globalAlpha = 0.28;
-      ctx.fillStyle = project.accent;
-      for (let row = 0; row < 5; row++) {
-        for (let col = 0; col < 14; col++) {
-          if (Math.random() > 0.42) continue;
-          const x = (col + 0.5) * (w / 13);
-          const y = (row + 0.5) * (h / 4.5);
-          ctx.beginPath();
-          ctx.arc(x, y, 1 + Math.random() * 2, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      }
-      ctx.globalAlpha = 0.1;
-      ctx.strokeStyle = project.accent;
-      ctx.lineWidth = 0.8;
-      for (let i = 0; i < 3; i++) {
-        const cx = w * (0.2 + i * 0.3);
-        const s = 22 + i * 18;
-        ctx.strokeRect(cx - s / 2, h * 0.46 - s / 2, s, s);
-      }
-      ctx.globalAlpha = 0.1;
-      ctx.strokeStyle = project.accent;
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(0, h * 0.72);
-      ctx.lineTo(w, h * 0.28);
-      ctx.stroke();
-      ctx.globalAlpha = 1;
+    if (!active) { setVal(0); return; }
+    let start: number | null = null;
+    const step = (ts: number) => {
+      if (!start) start = ts;
+      const p = Math.min((ts - start) / duration, 1);
+      setVal(Math.floor(p * target));
+      if (p < 1) requestAnimationFrame(step);
+      else setVal(target);
     };
-    const ro = new ResizeObserver(draw);
-    ro.observe(canvas);
-    draw();
-    return () => ro.disconnect();
-  }, [project]);
+    requestAnimationFrame(step);
+  }, [target, active, duration]);
+  return val;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SLIDE COMPONENT — one full-screen slide per project
+// Layout: LEFT = editorial text panel (40%), RIGHT = full-bleed image (60%)
+// ─────────────────────────────────────────────────────────────────────────────
+
+function ProjectSlide({
+  project,
+  index,
+  total,
+  isActive,
+}: {
+  project: EnhancedProject;
+  index: number;
+  total: number;
+  isActive: boolean;
+}) {
+  const numVal = useCountUp(index + 1, isActive, 500);
+  const isScreenshot = project.imageDisplay === "screenshot";
 
   return (
     <div
-      className="relative w-full overflow-hidden"
-      style={{ height: "clamp(150px, 22vh, 240px)" }}
+      className="proj-slide absolute inset-0 flex"
+      style={{ pointerEvents: isActive ? "auto" : "none" }}
     >
-      <canvas ref={canvasRef} className="w-full h-full block" />
+
+      {/* ── LEFT: Editorial text panel ─────────────────────────────────── */}
       <div
-        className="absolute inset-0"
-        style={{ background: "linear-gradient(to bottom, transparent 35%, rgba(0,0,0,0.45) 100%)" }}
-      />
-      <div className="absolute bottom-3 left-4 pr-4 sm:bottom-4 sm:left-5">
-        <p
-          className="font-syne font-bold leading-none"
-          style={{ fontSize: "clamp(17px, 3vw, 26px)", color: "var(--text-primary)" }}
-        >
-          {project.title}
-        </p>
-      </div>
-      <div
-        className="absolute bottom-4 right-4 sm:right-5 flex items-center gap-1 font-dm"
-        style={{ fontSize: 12, color: "var(--text-secondary)" }}
+        className="proj-text-panel relative flex flex-col justify-between"
+        style={{
+          width: "clamp(300px, 42%, 520px)",
+          padding: "clamp(32px,5vh,64px) clamp(24px,4vw,60px)",
+          background: "var(--bg)",
+          zIndex: 2,
+          flexShrink: 0,
+        }}
       >
-        <Calendar size={11} />
-        {project.year}
+        {/* Top: index + total */}
+        <div className="flex items-center justify-between">
+          <div
+            className="font-dm"
+            style={{ fontSize: 11, color: "var(--text-muted)", letterSpacing: "0.12em" }}
+          >
+            <span style={{ color: project.glowColor, fontVariantNumeric: "tabular-nums" }}>
+              {String(numVal).padStart(2, "0")}
+            </span>
+            <span style={{ margin: "0 6px", opacity: 0.3 }}>/</span>
+            {String(total).padStart(2, "0")}
+          </div>
+
+          {/* Accent line */}
+          <div
+            className="proj-line"
+            style={{
+              height: 1,
+              width: 48,
+              background: project.gradientBar,
+              borderRadius: 99,
+            }}
+          />
+        </div>
+
+        {/* Middle: main editorial content */}
+        <div className="proj-content flex flex-col gap-5">
+          {/* Category badge */}
+          <div
+            className="font-dm inline-flex items-center gap-2 w-fit"
+            style={{
+              fontSize: 10,
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+              color: project.glowColor,
+              padding: "4px 12px",
+              border: `0.5px solid rgba(${project.accentRgb},0.35)`,
+              borderRadius: 99,
+              background: `rgba(${project.accentRgb},0.06)`,
+            }}
+          >
+            <span
+              style={{
+                width: 5, height: 5, borderRadius: "50%",
+                background: project.glowColor,
+                display: "inline-block",
+                boxShadow: `0 0 6px ${project.glowColor}`,
+              }}
+            />
+            {project.subtitle}
+          </div>
+
+          {/* Title — large editorial */}
+          <h3
+            className="font-syne font-bold"
+            style={{
+              fontSize: "clamp(26px, 3.8vw, 52px)",
+              lineHeight: 1.0,
+              color: "var(--text-primary)",
+              letterSpacing: "-0.02em",
+            }}
+          >
+            {project.title}
+          </h3>
+
+          {/* Year inline */}
+          <div
+            className="font-dm"
+            style={{ fontSize: 12, color: "var(--text-muted)", letterSpacing: "0.06em" }}
+          >
+            {project.year}
+          </div>
+
+          {/* Divider */}
+          <div
+            style={{
+              height: "0.5px",
+              background: "var(--border)",
+              width: "100%",
+            }}
+          />
+
+          {/* Description */}
+          <p
+            className="font-dm leading-relaxed"
+            style={{
+              fontSize: "clamp(12px, 1.4vw, 14px)",
+              color: "var(--text-secondary)",
+              lineHeight: 1.75,
+            }}
+          >
+            {project.description}
+          </p>
+
+          {/* Highlights — vertical list */}
+          <ul className="flex flex-col gap-2" style={{ listStyle: "none", padding: 0, margin: 0 }}>
+            {project.highlights.map((h: string) => (
+              <li
+                key={h}
+                className="font-dm flex items-center gap-3"
+                style={{ fontSize: "clamp(11px, 1.2vw, 12.5px)", color: "var(--text-secondary)" }}
+              >
+                <span
+                  style={{
+                    width: 16, height: 1,
+                    background: project.gradientBar,
+                    borderRadius: 99,
+                    flexShrink: 0,
+                  }}
+                />
+                {h}
+              </li>
+            ))}
+          </ul>
+
+          {/* Tech chips */}
+          <div className="flex flex-wrap gap-1.5">
+            {project.tech.slice(0, 5).map((t: string) => (
+              <span
+                key={t}
+                className="font-dm"
+                style={{
+                  fontSize: 10,
+                  padding: "3px 10px",
+                  border: "0.5px solid var(--border)",
+                  borderRadius: 4,
+                  color: "var(--text-muted)",
+                  background: "var(--surface-2)",
+                  letterSpacing: "0.04em",
+                }}
+              >
+                {t}
+              </span>
+            ))}
+            {project.tech.length > 5 && (
+              <span
+                className="font-dm"
+                style={{
+                  fontSize: 10, padding: "3px 10px",
+                  border: "0.5px solid var(--border)",
+                  borderRadius: 4, color: "var(--text-muted)",
+                  background: "var(--surface-2)",
+                }}
+              >
+                +{project.tech.length - 5}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Bottom: CTA links */}
+        <div className="flex items-center gap-4">
+          <a
+            href={project.liveUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-dm font-medium inline-flex items-center gap-1.5 no-underline group"
+            style={{
+              fontSize: 12,
+              color: project.glowColor,
+              padding: "10px 20px",
+              border: `0.5px solid rgba(${project.accentRgb},0.4)`,
+              borderRadius: 6,
+              background: `rgba(${project.accentRgb},0.06)`,
+              transition: "background 0.2s, border-color 0.2s",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.background = `rgba(${project.accentRgb},0.14)`;
+              (e.currentTarget as HTMLElement).style.borderColor = `rgba(${project.accentRgb},0.7)`;
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.background = `rgba(${project.accentRgb},0.06)`;
+              (e.currentTarget as HTMLElement).style.borderColor = `rgba(${project.accentRgb},0.4)`;
+            }}
+          >
+            Live site
+            <ArrowUpRight size={12} />
+          </a>
+
+          <a
+            href={project.githubUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-dm inline-flex items-center gap-1.5 no-underline"
+            style={{
+              fontSize: 12,
+              color: "var(--text-muted)",
+              padding: "10px 20px",
+              border: "0.5px solid var(--border)",
+              borderRadius: 6,
+              transition: "color 0.2s, border-color 0.2s",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.color = "var(--text-primary)";
+              (e.currentTarget as HTMLElement).style.borderColor = "var(--text-muted)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.color = "var(--text-muted)";
+              (e.currentTarget as HTMLElement).style.borderColor = "var(--border)";
+            }}
+          >
+            <Github size={12} />
+            Source
+          </a>
+        </div>
       </div>
+
+      {/* ── RIGHT: Full-bleed image panel ─────────────────────────────── */}
+      <div
+        className="proj-image-panel relative flex-1 overflow-hidden"
+        style={{ background: isScreenshot ? "var(--bg-2)" : "var(--surface)" }}
+      >
+        {/* Project image */}
+        <div
+          className="absolute inset-0"
+          style={{
+            padding: isScreenshot ? "clamp(20px, 3vw, 40px)" : 0,
+            zIndex: 1,
+          }}
+        >
+          <div
+            className="relative h-full w-full overflow-hidden"
+            style={{
+              borderRadius: isScreenshot ? 24 : 0,
+              border: isScreenshot ? "1px solid rgba(15, 14, 13, 0.08)" : "none",
+              boxShadow: isScreenshot ? "0 24px 80px rgba(15, 14, 13, 0.12)" : "none",
+              background: isScreenshot ? "#ffffff" : "transparent",
+            }}
+          >
+            <Image
+              src={project.image}
+              alt={project.title}
+              fill
+              sizes="60vw"
+              className={isScreenshot ? "object-contain proj-img" : "object-cover proj-img"}
+              style={{ objectPosition: isScreenshot ? "center 54%" : undefined }}
+              priority={index === 0}
+            />
+          </div>
+        </div>
+
+        {/* Left edge gradient blending into text panel */}
+        {!isScreenshot && (
+          <div
+            className="absolute inset-y-0 left-0 pointer-events-none"
+            style={{
+              width: 80,
+              background: "linear-gradient(to right, var(--bg), transparent)",
+              zIndex: 2,
+            }}
+          />
+        )}
+
+        {/* Subtle dark overlay for contrast */}
+        {!isScreenshot && (
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: "linear-gradient(135deg, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.32) 100%)",
+              zIndex: 1,
+            }}
+          />
+        )}
+
+        {/* Accent color overlay — very subtle tint matching project color */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: isScreenshot
+              ? `radial-gradient(ellipse at 85% 10%, rgba(${project.accentRgb},0.1) 0%, transparent 55%)`
+              : `radial-gradient(ellipse at 70% 30%, rgba(${project.accentRgb},0.12) 0%, transparent 65%)`,
+            zIndex: 1,
+          }}
+        />
+
+        {/* Bottom-right: floating project number watermark */}
+        {!isScreenshot && (
+          <div
+            className="absolute bottom-6 right-8 font-syne font-bold select-none pointer-events-none"
+            style={{
+              fontSize: "clamp(72px, 12vw, 140px)",
+              lineHeight: 1,
+              color: "rgba(255,255,255,0.06)",
+              zIndex: 2,
+              letterSpacing: "-0.04em",
+            }}
+          >
+            {String(index + 1).padStart(2, "0")}
+          </div>
+        )}
+
+        {/* Top-right: accent bar + external link icon */}
+        <div
+          className="absolute top-6 right-6 flex items-center gap-3"
+          style={{ zIndex: 3 }}
+        >
+          <div
+            style={{
+              width: 32, height: 32,
+              borderRadius: "50%",
+              background: `rgba(${project.accentRgb},0.2)`,
+              border: `0.5px solid rgba(${project.accentRgb},0.5)`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}
+          >
+            <ExternalLink size={13} color={project.glowColor} />
+          </div>
+        </div>
+
+        {/* Accent bar at bottom of image */}
+        <div
+          className="absolute bottom-0 left-0 right-0"
+          style={{ height: 3, background: project.gradientBar, zIndex: 3 }}
+        />
+      </div>
+
     </div>
   );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// CARD CONTENT
+// MOBILE CARD — simple stacked list for small screens
 // ─────────────────────────────────────────────────────────────────────────────
 
-function CardContent({ project }: { project: EnhancedProject }) {
+function MobileCard({ project, index }: { project: EnhancedProject; index: number }) {
+  const isScreenshot = project.imageDisplay === "screenshot";
+
   return (
-    <div
-      className="relative rounded-2xl md:rounded-3xl overflow-hidden"
+    <motion.div
+      initial={{ opacity: 0, y: 32 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ duration: 0.5, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
       style={{
-        background: "var(--surface)",
+        borderRadius: 16,
+        overflow: "hidden",
         border: "0.5px solid var(--border)",
-        boxShadow: `0 1px 0 var(--border) inset, 0 24px 80px rgba(0,0,0,0.1), 0 0 120px ${project.glowColor}12`,
+        background: "var(--surface)",
+        boxShadow: `0 0 60px rgba(${project.accentRgb},0.06)`,
       }}
     >
-      <div style={{ height: 3, background: project.gradientBar, boxShadow: `0 0 18px ${project.glowColor}80` }} />
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: `radial-gradient(600px at 50% -8%, ${project.glowColor}12 0%, transparent 55%)`,
-          borderRadius: "inherit",
-        }}
-      />
-      <ProjectImage project={project} />
-      <div className="p-4 sm:p-5 md:p-6 lg:p-7">
-        <div className="flex items-start justify-between mb-3">
-          <p
-            className="font-dm font-medium tracking-widest uppercase"
-            style={{ fontSize: "clamp(9px, 1.4vw, 11px)", color: "var(--text-muted)" }}
+      {/* Accent bar */}
+      <div style={{ height: 3, background: project.gradientBar }} />
+
+      {/* Image */}
+      <div className="relative w-full" style={{ height: isScreenshot ? 240 : 200, background: isScreenshot ? "var(--bg-2)" : "transparent" }}>
+        <div
+          className="absolute inset-0"
+          style={{ padding: isScreenshot ? 14 : 0 }}
+        >
+          <div
+            className="relative h-full w-full overflow-hidden"
+            style={{
+              borderRadius: isScreenshot ? 16 : 0,
+              background: isScreenshot ? "#ffffff" : "transparent",
+              border: isScreenshot ? "1px solid rgba(15, 14, 13, 0.08)" : "none",
+            }}
           >
-            {project.subtitle}
-          </p>
-          <div className="flex gap-1.5 flex-shrink-0 ml-2">
-            {([
-              { href: project.githubUrl, Icon: Github,       label: "GitHub" },
-              { href: project.liveUrl,   Icon: ExternalLink, label: "Live"   },
-            ] as const).map(({ href, Icon, label }) => (
-              <motion.a
-                key={label}
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={label}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.93 }}
-                className="flex items-center justify-center rounded-xl flex-shrink-0"
-                style={{
-                  width: 32, height: 32,
-                  border: "0.5px solid var(--border)",
-                  background: "var(--surface-2)",
-                  color: "var(--text-muted)",
-                  transition: "color .15s, border-color .15s, background .15s",
-                }}
-                onMouseEnter={(e) => {
-                  const el = e.currentTarget as HTMLElement;
-                  el.style.color = project.accent;
-                  el.style.borderColor = project.accent + "55";
-                  el.style.background = project.glowColor + "18";
-                }}
-                onMouseLeave={(e) => {
-                  const el = e.currentTarget as HTMLElement;
-                  el.style.color = "var(--text-muted)";
-                  el.style.borderColor = "var(--border)";
-                  el.style.background = "var(--surface-2)";
-                }}
-              >
-                <Icon size={13} />
-              </motion.a>
-            ))}
+            <Image
+              src={project.image}
+              alt={project.title}
+              fill
+              className={isScreenshot ? "object-contain" : "object-cover"}
+              style={{ objectPosition: isScreenshot ? "center 54%" : undefined }}
+            />
           </div>
         </div>
+        {!isScreenshot && (
+          <div
+            className="absolute inset-0"
+            style={{ background: "linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.55) 100%)" }}
+          />
+        )}
+        <div
+          className="absolute bottom-3 left-4"
+          style={isScreenshot ? {
+            padding: "8px 10px",
+            borderRadius: 12,
+            background: "rgba(255,255,255,0.92)",
+            boxShadow: "0 12px 30px rgba(15, 14, 13, 0.08)",
+          } : undefined}
+        >
+          <p
+            className="font-syne font-bold"
+            style={{
+              fontSize: 20,
+              color: isScreenshot ? "var(--text-primary)" : "#fff",
+              letterSpacing: "-0.02em",
+            }}
+          >
+            {project.title}
+          </p>
+          <p
+            className="font-dm"
+            style={{
+              fontSize: 11,
+              color: isScreenshot ? "var(--text-secondary)" : "rgba(255,255,255,0.65)",
+              marginTop: 2,
+            }}
+          >
+            {project.year}
+          </p>
+        </div>
+      </div>
 
-        <p
-          className="font-dm leading-relaxed"
+      {/* Content */}
+      <div className="p-5 flex flex-col gap-4">
+        <div
+          className="font-dm inline-flex items-center gap-2 w-fit"
           style={{
-            fontSize: "clamp(12px, 1.7vw, 13.5px)",
-            color: "var(--text-secondary)",
-            marginBottom: "clamp(10px, 1.8vh, 18px)",
-            lineHeight: 1.7,
+            fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase",
+            color: project.glowColor, padding: "3px 10px",
+            border: `0.5px solid rgba(${project.accentRgb},0.35)`, borderRadius: 99,
+            background: `rgba(${project.accentRgb},0.06)`,
           }}
         >
+          <span style={{ width: 4, height: 4, borderRadius: "50%", background: project.glowColor, display: "inline-block" }} />
+          {project.subtitle}
+        </div>
+
+        <p className="font-dm" style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.7 }}>
           {project.description}
         </p>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "clamp(4px, 0.9vh, 8px) 14px",
-            marginBottom: "clamp(10px, 1.8vh, 18px)",
-          }}
-        >
-          {project.highlights.map((h: string) => (
-            <div
-              key={h}
-              className="flex items-center gap-2 font-dm"
-              style={{ fontSize: "clamp(10px, 1.4vw, 12px)", color: "var(--text-secondary)" }}
-            >
-              <span
-                className="flex-shrink-0 rounded-full"
-                style={{ width: 5, height: 5, background: project.accent, boxShadow: `0 0 4px ${project.accent}` }}
-              />
-              {h}
-            </div>
-          ))}
-        </div>
-
-        <div className="flex flex-wrap gap-1.5" style={{ marginBottom: "clamp(10px, 1.8vh, 18px)" }}>
-          {project.tech.slice(0, 5).map((t: string) => (
+        <div className="flex flex-wrap gap-1.5">
+          {project.tech.slice(0, 4).map((t: string) => (
             <span
               key={t}
-              className="font-dm rounded-lg"
+              className="font-dm"
               style={{
-                fontSize: "clamp(9px, 1.2vw, 11px)",
-                padding: "3px 9px",
-                border: "0.5px solid var(--border)",
-                background: "var(--surface-2)",
-                color: "var(--text-muted)",
+                fontSize: 10, padding: "3px 9px",
+                border: "0.5px solid var(--border)", borderRadius: 4,
+                color: "var(--text-muted)", background: "var(--surface-2)",
               }}
             >
               {t}
             </span>
           ))}
-          {project.tech.length > 5 && (
-            <span
-              className="font-dm rounded-lg"
-              style={{
-                fontSize: "clamp(9px, 1.2vw, 11px)",
-                padding: "3px 9px",
-                border: "0.5px solid var(--border)",
-                background: "var(--surface-2)",
-                color: "var(--text-muted)",
-              }}
-            >
-              +{project.tech.length - 5}
-            </span>
-          )}
         </div>
 
-        <motion.a
-          href={project.liveUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 font-dm font-medium no-underline"
-          style={{ fontSize: "clamp(11px, 1.4vw, 12px)", color: project.accent }}
-          whileHover={{ x: 5 }}
-          transition={{ type: "spring", stiffness: 420, damping: 22 }}
-        >
-          View project
-          <ArrowRight size={12} />
-        </motion.a>
+        <div className="flex gap-3">
+          <a
+            href={project.liveUrl} target="_blank" rel="noopener noreferrer"
+            className="font-dm no-underline flex-1 flex items-center justify-center gap-1.5"
+            style={{
+              fontSize: 12, color: project.glowColor, padding: "9px 0",
+              border: `0.5px solid rgba(${project.accentRgb},0.4)`, borderRadius: 6,
+              background: `rgba(${project.accentRgb},0.06)`, fontWeight: 500,
+            }}
+          >
+            Live site <ArrowUpRight size={11} />
+          </a>
+          <a
+            href={project.githubUrl} target="_blank" rel="noopener noreferrer"
+            className="font-dm no-underline flex-1 flex items-center justify-center gap-1.5"
+            style={{
+              fontSize: 12, color: "var(--text-muted)", padding: "9px 0",
+              border: "0.5px solid var(--border)", borderRadius: 6,
+            }}
+          >
+            <Github size={11} /> Source
+          </a>
+        </div>
       </div>
+    </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// VERTICAL PROGRESS RAIL
+// ─────────────────────────────────────────────────────────────────────────────
+
+function ProgressRail({
+  total,
+  active,
+  projects,
+}: {
+  total: number;
+  active: number;
+  projects: EnhancedProject[];
+}) {
+  return (
+    <div
+      className="absolute flex flex-col items-center gap-3"
+      style={{ right: 28, top: "50%", transform: "translateY(-50%)", zIndex: 20 }}
+    >
+      {Array.from({ length: total }).map((_, i) => (
+        <div key={i} className="relative flex items-center justify-center" style={{ width: 20, height: 20 }}>
+          {/* Outer ring when active */}
+          <AnimatePresence>
+            {i === active && (
+              <motion.div
+                key="ring"
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0, opacity: 0 }}
+                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                style={{
+                  position: "absolute",
+                  width: 18, height: 18,
+                  borderRadius: "50%",
+                  border: `1.5px solid ${projects[i].glowColor}`,
+                  boxShadow: `0 0 10px ${projects[i].glowColor}60`,
+                }}
+              />
+            )}
+          </AnimatePresence>
+          {/* Dot */}
+          <motion.div
+            animate={{
+              width: i === active ? 7 : 5,
+              height: i === active ? 7 : 5,
+              background: i === active ? projects[i].glowColor : "var(--border)",
+              boxShadow: i === active ? `0 0 8px ${projects[i].glowColor}` : "none",
+            }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            style={{ borderRadius: "50%", flexShrink: 0 }}
+          />
+        </div>
+      ))}
     </div>
   );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PROJECTS SECTION
+// MAIN SECTION
 //
-// ┌─────────────────────────────────────────────────────────────────┐
-// │  <section>   (position: relative)                               │
-// │                                                                  │
-// │  ┌── Header ──────────────────────────────────────────────────┐ │
-// │  │  "My Work" + title + description  (normal flow)            │ │
-// │  └────────────────────────────────────────────────────────────┘ │
-// │                                                                  │
-// │  ┌── Runway div  (height = N × 100vh) ───────────────────────┐ │
-// │  │                                                             │ │
-// │  │  ┌── Sticky panel  (position:sticky, top:0, h:100vh) ───┐  │ │
-// │  │  │  Full-viewport panel. Does NOT scroll away.           │  │ │
-// │  │  │  Contains the card stack centered in the viewport.    │  │ │
-// │  │  │                                                        │  │ │
-// │  │  │  card[0]  z:1  → visible from start                   │  │ │
-// │  │  │  card[1]  z:2  → translateY(100vh), GSAP slides in    │  │ │
-// │  │  │  card[N]  z:N+1 → same                                │  │ │
-// │  │  └────────────────────────────────────────────────────────┘  │ │
-// │  │  (runway is taller than sticky panel →                       │ │
-// │  │   sticky panel stays locked while runway scrolls through)    │ │
-// │  └─────────────────────────────────────────────────────────────┘ │
-// └─────────────────────────────────────────────────────────────────┘
+// Desktop: sticky viewport + runway scroll, GSAP scrub drives slide transitions.
+//   Each slide occupies the full viewport.
+//   Transition: current slide text clips/fades left, image clips left.
+//               next slide enters from right.
 //
-// GSAP scroll trigger anchors to runway's TOP edge.
-// Card[i] enters when runway has scrolled  (i-1)*100vh  from its top.
-// Card[i] completes entrance at             i*100vh.
+// Mobile: simple animated card list (no horizontal scroll nonsense on mobile).
 //
-// KEY FIX vs previous version:
-//   The header is OUTSIDE the runway. This means the sticky panel starts
-//   at the very top of the runway and sticks at top:0 of the viewport
-//   (accounting for the fixed navbar via top: var(--nav-height, 0px)).
-//   No partial card crop, no section scroll-away bug.
+// Architecture:
+//   • Runway div:  height = n × 100vh  (provides scroll distance)
+//   • Sticky div:  position:sticky, top:0, height:100vh  (locks panel)
+//   • Each .proj-slide: absolute inset-0 (all stack on top of each other)
+//   • GSAP timeline: clipPath + x transitions per slide pair
+//   • scrub:0.6 = very responsive, no lag feel
 // ─────────────────────────────────────────────────────────────────────────────
 
-// How many vh of scroll runway each card transition occupies.
-// 100vh = user must scroll one full screen height per card.
-const SCROLL_PER_CARD = 100;
-
 export default function Projects() {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const stackRef   = useRef<HTMLDivElement>(null);
   const headerRef  = useRef<HTMLDivElement>(null);
+  const runwayRef  = useRef<HTMLDivElement>(null);
+  const stageRef   = useRef<HTMLDivElement>(null);
+  const stackRef   = useRef<HTMLDivElement>(null);
   const inView     = useInView(headerRef, { once: true, margin: "-80px" });
   const projects   = useEnhancedProjects();
   const ctxRef     = useRef<gsap.Context | null>(null);
+  const [activeIdx, setActiveIdx] = useState(0);
+  const n = projects.length;
 
   useEffect(() => {
-    if (!sectionRef.current || !stackRef.current || projects.length === 0) return;
+    // Desktop only — mobile uses simple list
+    const mq = window.matchMedia("(min-width: 640px)");
+    if (!mq.matches) return;
+    if (!runwayRef.current || !stageRef.current || !stackRef.current || n === 0) return;
 
     ctxRef.current?.revert();
 
     ctxRef.current = gsap.context(() => {
-      const cards = gsap.utils.toArray<HTMLElement>(".project-card", stackRef.current!);
+      const slides      = gsap.utils.toArray<HTMLElement>(".proj-slide",        stackRef.current!);
+      const textPanels  = gsap.utils.toArray<HTMLElement>(".proj-text-panel",   stackRef.current!);
+      const imgPanels   = gsap.utils.toArray<HTMLElement>(".proj-image-panel",  stackRef.current!);
+      const imgs        = gsap.utils.toArray<HTMLElement>(".proj-img",          stackRef.current!);
 
-      // Set initial state: all cards except first start below viewport
-      cards.forEach((card, i) => {
-        if (i !== 0) {
-          gsap.set(card, { y: "100vh" });
-        }
-      });
-
-      // Single pinned timeline for all cards
-      const timeline = gsap.timeline({
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          pin: true,
-          start: "top top",
-          end: () => `+=${cards.length * 100}%`,
-          scrub: 1.2,
-          invalidateOnRefresh: true,
-        },
-      });
-
-      // Build timeline: scale current card, slide next card up
-      cards.forEach((card, i) => {
-        const isLastCard = i === cards.length - 1;
-
-        // Skip card 0 - keep it fixed and visible
+      // ── Initial state ──────────────────────────────────────────────────────
+      // Slide 0: fully visible, in place
+      // Slides 1..n-1: sitting off-screen to the right, waiting
+      slides.forEach((slide, i) => {
         if (i === 0) {
-          // Just bring in card 1 without scaling card 0
-          if (cards[i + 1]) {
-            timeline.to(
-              cards[i + 1],
-              {
-                y: 0,
-                ease: "power2.inOut",
-              }
-            );
-          }
-          return;
-        }
-
-        // Scale + dim current card (only for cards 1+ that aren't the last)
-        if (!isLastCard) {
-          timeline.to(card, {
-            scale: 0.93,
-            opacity: 0.6,
-            ease: "power1.inOut",
-          });
-        }
-
-        // Slide next card up from bottom (only if next exists)
-        if (cards[i + 1]) {
-          timeline.to(
-            cards[i + 1],
-            {
-              y: 0,
-              ease: "power2.inOut",
-            },
-            "<" // Start simultaneously with scale (or at same time for last card)
-          );
+          gsap.set(slide, { xPercent: 0, zIndex: i + 1, autoAlpha: 1 });
+        } else {
+          gsap.set(slide, { xPercent: 100, zIndex: i + 1, autoAlpha: 1 });
         }
       });
-    }, sectionRef);
+
+      // Image parallax offset — images start slightly zoomed & shifted
+      imgs.forEach((img, i) => {
+        if (i !== 0) gsap.set(img, { scale: 1.1, xPercent: 5 });
+        else gsap.set(img, { scale: 1.08, xPercent: 0 });
+      });
+
+      // Text panels: slide 0 visible, rest offset
+      textPanels.forEach((panel, i) => {
+        if (i !== 0) gsap.set(panel, { xPercent: 0 }); // hidden by parent slide
+      });
+
+      // ── Build scrubbed timeline ────────────────────────────────────────────
+      const tl = gsap.timeline({ paused: true });
+
+      for (let i = 0; i < n - 1; i++) {
+        const currSlide  = slides[i];
+        const nextSlide  = slides[i + 1];
+        const currImg    = imgs[i];
+        const nextImg    = imgs[i + 1];
+        const idx        = i;
+
+        const segStart = i;       // each transition = 1 unit in timeline
+
+        // 1) Current slide exits LEFT — text panel slides out faster (parallax depth)
+        tl.to(currSlide, {
+          xPercent: -100,
+          duration: 1,
+          ease: "power2.inOut",
+        }, segStart);
+
+        // 2) Current image has subtle parallax — moves less than the slide
+        tl.to(currImg, {
+          xPercent: -8,
+          scale: 1.05,
+          duration: 1,
+          ease: "power2.inOut",
+        }, segStart);
+
+        // 3) Next slide enters FROM RIGHT — lands at xPercent:0
+        tl.to(nextSlide, {
+          xPercent: 0,
+          duration: 1,
+          ease: "power2.inOut",
+          onUpdate() {
+            setActiveIdx(this.progress() >= 0.5 ? idx + 1 : idx);
+          },
+        }, segStart);
+
+        // 4) Next image: parallax settle — was slightly offset, now neutral
+        tl.to(nextImg, {
+          xPercent: 0,
+          scale: 1.04,
+          duration: 1,
+          ease: "power2.inOut",
+        }, segStart);
+      }
+
+      // ── ScrollTrigger ──────────────────────────────────────────────────────
+      ScrollTrigger.create({
+        trigger: runwayRef.current,
+        start: "top top",
+        end: () => `+=${(n - 1) * window.innerHeight}`,
+        pin: stageRef.current,
+        pinSpacing: false,
+        anticipatePin: 1,
+        scrub: 0.4,
+        animation: tl,
+        invalidateOnRefresh: true,
+        fastScrollEnd: true,
+      });
+    });
 
     return () => { ctxRef.current?.revert(); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [projects.length]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [n]);
 
   return (
-    <section
-      id="projects"
-      ref={sectionRef}
-      style={{ background: "var(--bg)", position: "relative", paddingBottom: "clamp(4px, 1vh, 80px)" }}
-    >
-
-      {/* ── HEADER — normal flow, sits above the sticky runway ─────────── */}
-      {/* Lives OUTSIDE the runway so it doesn't affect sticky positioning  */}
+    <>
+      {/* ── HEADER ─────────────────────────────────────────────────────── */}
       <div
+        id="projects"
         ref={headerRef}
         style={{
+          background: "var(--bg)",
           maxWidth: 800,
           margin: "0 auto",
-          padding: "clamp(60px, 10vh, 100px) clamp(16px, 4vw, 40px) clamp(40px, 6vh, 72px)",
+          padding: "clamp(60px,10vh,100px) clamp(16px,4vw,40px) clamp(40px,6vh,72px)",
         }}
       >
         <motion.div
           initial={{ opacity: 0, y: 22 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         >
           <span
             className="font-dm font-medium tracking-widest uppercase block"
@@ -486,13 +783,19 @@ export default function Projects() {
           </span>
           <h2
             className="font-syne font-bold"
-            style={{ fontSize: "clamp(28px, 5vw, 52px)", color: "var(--text-primary)", lineHeight: 1.05, marginBottom: 16 }}
+            style={{
+              fontSize: "clamp(28px,5vw,52px)",
+              color: "var(--text-primary)",
+              lineHeight: 1.05,
+              marginBottom: 16,
+              letterSpacing: "-0.02em",
+            }}
           >
             Featured Projects
           </h2>
           <p
             className="font-dm leading-relaxed"
-            style={{ fontSize: "clamp(13px, 2vw, 15px)", color: "var(--text-secondary)", maxWidth: 480 }}
+            style={{ fontSize: "clamp(13px,2vw,15px)", color: "var(--text-secondary)", maxWidth: 480 }}
           >
             A selection of things I've built — from privacy-first PDF tools to
             AI-powered restaurant systems and real-time collaboration engines.
@@ -500,60 +803,101 @@ export default function Projects() {
         </motion.div>
       </div>
 
-      {/* ── RUNWAY — drives all scroll math ────────────────────────────── */}
-      {/*
-        Removed: runway div is no longer needed with pinned timeline.
-        The section itself is pinned by ScrollTrigger.
-      */}
-
-      {/* ── CARD STACK ─────────────────────────────────────────────── */}
-      {/*
-        Simple absolute-positioned cards.
-        - Card 0 starts at y: 0 (visible)
-        - Cards 1..N start at y: 100vh (below, out of view)
-        - Timeline animates y: 100vh → 0 as user scrolls
-        - Increased container height to show card more prominently
-      */}
+      {/* ── DESKTOP: Runway + sticky scroll experience ─────────────────── */}
       <div
+        ref={runwayRef}
+        className="hidden sm:block"
         style={{
           position: "relative",
-          height: "clamp(75vh, 100vh, 100vh)",
+          height: `${n * 100}vh`,
+          background: "var(--bg)",
           width: "100%",
-          overflow: "hidden",
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "center",
-          paddingTop: "clamp(2px, 0.5vh, 40px)",
-          paddingBottom: "clamp(20px, 0vh, 50px)",
         }}
       >
         <div
-          ref={stackRef}
+          ref={stageRef}
           style={{
             position: "relative",
-            width: "min(92vw, 940px)",
-            height: "clamp(440px, 78vh, 720px)",
+            height: "100vh",
+            width: "100%",
+            overflow: "hidden",
+            background: "var(--bg)",
+            zIndex: 10,
+            willChange: "transform",
           }}
         >
-          {projects.map((project, i) => (
-            <div
-              key={project.title}
-              className="project-card"
-              style={{
-                position: "absolute",
-                inset: 0,
-                zIndex: i + 1,
-                willChange: "transform, opacity, scale",
-              }}
-            >
-              <CardContent project={project} />
-            </div>
-          ))}
+          {/* Card stack — overflow hidden clips slides entering/exiting */}
+          <div
+            ref={stackRef}
+            style={{
+              position: "absolute",
+              inset: 0,
+              overflow: "hidden",
+            }}
+          >
+            {projects.map((project, i) => (
+              <ProjectSlide
+                key={project.title}
+                project={project}
+                index={i}
+                total={n}
+                isActive={i === activeIdx}
+              />
+            ))}
+          </div>
+
+          {/* Progress rail */}
+          {n > 1 && (
+            <ProgressRail total={n} active={activeIdx} projects={projects} />
+          )}
+
+          {/* Scroll hint — only on first slide */}
+          <AnimatePresence>
+            {activeIdx === 0 && (
+              <motion.div
+                key="hint"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ delay: 1, duration: 0.5 }}
+                className="absolute bottom-8 left-1/2 font-dm flex flex-col items-center gap-2"
+                style={{ transform: "translateX(-50%)", zIndex: 20 }}
+              >
+                <span style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+                  Scroll to explore
+                </span>
+                <motion.div
+                  animate={{ y: [0, 6, 0] }}
+                  transition={{ repeat: Infinity, duration: 1.4, ease: "easeInOut" }}
+                  style={{
+                    width: 1, height: 28,
+                    background: "linear-gradient(to bottom, var(--text-muted), transparent)",
+                  }}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
 
-      {/* Breathing room at the bottom of the section */}
-      <div style={{ height: 0 }} />
-    </section>
+      {/* ── MOBILE: Stacked cards ────────────────────────────────────────── */}
+      <div
+        className="sm:hidden flex flex-col gap-6"
+        style={{
+          padding: "0 clamp(14px,4vw,24px) clamp(40px,8vh,80px)",
+          background: "var(--bg)",
+        }}
+      >
+        {projects.map((project, i) => (
+          <MobileCard key={project.title} project={project} index={i} />
+        ))}
+      </div>
+
+      {/* Bottom breathing room (desktop only) */}
+      <div
+        className="hidden sm:block"
+        style={{ height: "clamp(40px,8vh,80px)", background: "var(--bg)" }}
+      />
+    </>
   );
 }
